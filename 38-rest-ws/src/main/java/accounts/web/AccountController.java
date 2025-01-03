@@ -5,12 +5,17 @@ import common.money.Percentage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import rewards.internal.account.Account;
 import rewards.internal.account.Beneficiary;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 
@@ -66,7 +71,8 @@ public class AccountController {
 	// TODO-06: Complete this method. Add annotations to:
 	// a. Respond to POST /accounts requests
     // b. Use a proper annotation for creating an Account object from the request
-	public ResponseEntity<Void> createAccount(Account newAccount) {
+	@PostMapping("/accounts")
+	public ResponseEntity<Void> createAccount(@RequestBody Account newAccount) {
 		// Saving the account also sets its entity Id
 		Account account = accountManager.save(newAccount);
 
@@ -91,7 +97,12 @@ public class AccountController {
 		//     'ResponseEntity' to implement this - Use ResponseEntity.created(..)
 		// b. Refer to the POST example in the slides for more information
 
-		return null; // Return something other than null
+		URI uri = ServletUriComponentsBuilder
+				.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(resourceId)
+				.toUri();
+		return ResponseEntity.created(uri).build();
 	}
 
 	/**
@@ -112,14 +123,15 @@ public class AccountController {
 	// a. Respond to a POST /accounts/{accountId}/beneficiaries
 	// b. Extract a beneficiary name from the incoming request
 	// c. Indicate a "201 Created" status
-	public ResponseEntity<Void> addBeneficiary(long accountId, String beneficiaryName) {
-		
+	@PostMapping("/accounts/{accountId}/beneficiaries")
+	@ResponseStatus(HttpStatus.CREATED)
+	public ResponseEntity<Void> addBeneficiary(@PathVariable long accountId,@RequestBody String beneficiaryName) {
+		accountManager.addBeneficiary(accountId, beneficiaryName);
+		return entityWithLocation(beneficiaryName);
 		// TODO-11: Create a ResponseEntity containing the location of the newly
 		// created beneficiary.
 		// a. Use accountManager's addBeneficiary method to add a beneficiary to an account
 		// b. Use the entityWithLocation method - like we did for createAccount().
-		
-		return null;  // Modify this to return something
 	}
 
 	/**
@@ -129,7 +141,8 @@ public class AccountController {
 	// TODO-12: Complete this method by adding the appropriate annotations to:
 	// a. Respond to a DELETE to /accounts/{accountId}/beneficiaries/{beneficiaryName}
 	// b. Indicate a "204 No Content" status
-	public void removeBeneficiary(long accountId, String beneficiaryName) {
+	@DeleteMapping("/accounts/{accountId}/beneficiaries/{beneficiaryName}")
+	public void removeBeneficiary(@PathVariable long accountId,@PathVariable String beneficiaryName) {
 		Account account = accountManager.getAccount(accountId);
 		if (account == null) {
 			throw new IllegalArgumentException("No such account with id " + accountId);
@@ -142,9 +155,8 @@ public class AccountController {
 		// exception.
 		if (account.getBeneficiaries().size() != 1 && (!b.getAllocationPercentage().equals(Percentage.zero()))) {
 			// The solution has the missing logic, if you are interested.
-			throw new RuntimeException("Logic to rebalance Beneficiaries not defined.");
+			throw new RuntimeException("Logic to reBalance Beneficiaries not defined.");
 		}
-
 		accountManager.removeBeneficiary(accountId, beneficiaryName, new HashMap<String, Percentage>());
 	}
 
@@ -162,7 +174,12 @@ public class AccountController {
 	// - It should map DataIntegrityViolationException to a 409 Conflict status code.
 	// - Use the handleNotFound method above for guidance.
 	// - Consult the lab document for further instruction
-	
+	@ResponseStatus(HttpStatus.CONFLICT)
+	@ExceptionHandler({ DataIntegrityViolationException.class })
+	public void handleAlreadyExist(Exception ex) {
+		logger.error("Exception is: ", ex);
+		// just return empty 409
+	}
 	/**
 	 * Finds the Account with the given id, throwing an IllegalArgumentException
 	 * if there is no such Account.
