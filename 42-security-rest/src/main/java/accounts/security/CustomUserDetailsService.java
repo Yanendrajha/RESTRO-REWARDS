@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
 //Optional exercise - Do the remaining steps only if you have extra time
 //TODO-13 (Optional): Create custom UserDetailsService
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 // - Comment the @Component annotation added in a previous task
 
 @Primary
+//@Component
 public class CustomUserDetailsService implements UserDetailsService {
 
 	private PasswordEncoder passwordEncoder;
@@ -34,19 +36,19 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		User.UserBuilder builder = User.builder();
-//     builder.username(username);
-//     builder.password(passwordEncoder.encode(username));
-//     switch (username) {
-//         case "mary":
-//             builder.roles("USER");
-//             break;
-//         case "joe":
-//             builder.roles("USER", "ADMIN");
-//             break;
-//         default:
-//             throw new UsernameNotFoundException("User not found.");
-//     }
+		builder.username(username);
+		builder.password(passwordEncoder.encode(username));
+		switch (username) {
+			 case "mary":
+				 builder.roles("USER");
+				 break;
+			 case "joe":
+				 builder.roles("USER", "ADMIN");
+				 break;
+			 default:
+				 throw new UsernameNotFoundException("User not found.");
+		}
 
-		return builder.build();
-	}
+			return builder.build();
+		}
 }

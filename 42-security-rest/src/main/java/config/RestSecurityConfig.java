@@ -4,6 +4,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.core.userdetails.User;
@@ -17,13 +19,25 @@ import org.springframework.security.web.SecurityFilterChain;
 // - Add @EnableMethodSecurity annotation to this class
 
 @Configuration
+@EnableMethodSecurity
 public class RestSecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 		// @formatter:off
-        http.authorizeHttpRequests((authz) -> authz
+		http.authorizeHttpRequests((authz) -> authz
+						.requestMatchers(HttpMethod.GET, "/accounts/**").hasAnyRole("USER", "ADMIN", "SUPERADMIN")
+						.requestMatchers(HttpMethod.PUT, "/accounts/**").hasAnyRole("ADMIN", "SUPERADMIN")
+						.requestMatchers(HttpMethod.POST, "/accounts/**").hasAnyRole("ADMIN", "SUPERADMIN")
+						.requestMatchers(HttpMethod.DELETE, "/accounts/**").hasAnyRole("SUPERADMIN")
+						.requestMatchers(HttpMethod.GET, "/authorities").hasAnyRole("USER", "ADMIN", "SUPERADMIN")
+						.anyRequest().denyAll())
+				.httpBasic(withDefaults())
+				.csrf(CsrfConfigurer::disable);
+
+
+
                 // TODO-04: Configure authorization using requestMatchers method
                 // - Allow DELETE on the /accounts resource (or any sub-resource)
                 //   for "SUPERADMIN" role only
@@ -35,9 +49,7 @@ public class RestSecurityConfig {
                 //   for all roles - "USER", "ADMIN", "SUPERADMIN"
 
                 // Deny any request that doesn't match any authorization rule
-                .anyRequest().denyAll())
-        .httpBasic(withDefaults())
-        .csrf(CsrfConfigurer::disable);
+
         // @formatter:on
 
         return http.build();
@@ -46,7 +58,7 @@ public class RestSecurityConfig {
 	// TODO-14b (Optional): Remove the InMemoryUserDetailsManager definition
 	// - Comment the @Bean annotation below
 	
-	@Bean
+	//@Bean
     public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
 
 		// TODO-05: Add three users with corresponding roles:
@@ -56,8 +68,10 @@ public class RestSecurityConfig {
 		// (Make sure to store the password in encoded form.)
     	// - pass all users in the InMemoryUserDetailsManager constructor
 		UserDetails user = User.withUsername("user").password(passwordEncoder.encode("user")).roles("USER").build();
+		UserDetails admin = User.withUsername("admin").password(passwordEncoder.encode("admin")).roles("ADMIN", "USER").build();
+		UserDetails superadmin = User.withUsername("superadmin").password(passwordEncoder.encode("superadmin")).roles("SUPERADMIN","ADMIN", "USER").build();
 
-		return new InMemoryUserDetailsManager(user /* Add new users comma-separated here */);
+		return new InMemoryUserDetailsManager(user, admin, superadmin);
 	}
     
     @Bean
