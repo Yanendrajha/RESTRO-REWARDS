@@ -1,7 +1,0 @@
-accounts\web\RestaurantHealthCheck2.class
-accounts\ActuatorApplication.class
-accounts\web\ActuatorSecurityConfiguration.class
-accounts\web\AccountController.class
-accounts\web\RestaurantHealthCheck.class
-accounts\web\AccountAspect.class
-accounts\web\RestaurantCustomEndpoint.class

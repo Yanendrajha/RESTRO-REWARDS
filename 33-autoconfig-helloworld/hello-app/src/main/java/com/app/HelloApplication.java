@@ -10,13 +10,6 @@ import org.springframework.context.annotation.Bean;
 //          or in the root pom.xml (Maven)
 // TODO-11: Go to TO-DO-11 in the same file
 
-// ------------------------------------------
-
-// TODO-13: Go to TO-DO-13 in the build.gradle (Gradle) or
-//          pom.xml (Maven) of the "hello-app" project
-
-// ------------------------------------------
-
 // TODO-20: Now we are ready to leverage "hello-starter" project.
 // First, we want to configure "TypicalHelloService" bean
 // via "hello-starter" project instead of directly from
@@ -24,10 +17,6 @@ import org.springframework.context.annotation.Bean;
 //
 // TODO-21: Comment out the explicit @Bean configuration you just
 //          added in the previous step (TO-DO-16 below in this class)
-//
-// TODO-22: Go to TO-DO-22 in the build.gradle (Gradle) or
-//          pom.xml (Maven) of the "hello-app" project
-
 // ------------------------------------------
 
 //
