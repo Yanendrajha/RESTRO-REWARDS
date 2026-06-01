@@ -1,72 +1,108 @@
-# RESTRO-REWARDS
+# 🍽️ RestroRewards
 
-**Restaurant Loyalty Program**
+A modular restaurant loyalty rewards system built with Spring Boot, demonstrating progressive Spring framework concepts from core DI to production-ready REST APIs with security.
 
-## Table of Contents
-- [Introduction](#introduction)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Contact](#contact)
+[![Java](https://img.shields.io/badge/Java-11-orange)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-green)](https://spring.io/projects/spring-boot)
 
-## Introduction
-RESTRO-REWARDS is a comprehensive Restaurant Loyalty Program designed to help restaurant owners reward their loyal customers. The program is built using Java with a focus on simplicity and efficiency.
+---
 
-## Features
-- **Customer Management:** Easily add, update, and manage customer information.
-- **Reward Points System:** Track and manage reward points for each customer.
-- **Transaction Logging:** Keep a record of all transactions and reward points earned.
-- **Reports:** Generate detailed reports on customer activity and rewards.
-
-## Installation
-To get started with RESTRO-REWARDS, follow these steps:
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Yanendrajha/RESTRO-REWARDS.git
-   cd RESTRO-REWARDS
-   ```
-
-2. Ensure you have Java and Maven installed:
-   ```bash
-   java -version
-   mvn -version
-   ```
-
-3. Navigate to the appropriate submodule directory (e.g., `30-jdbc-boot`) and run the project using Maven:
-   ```bash
-   cd 30-jdbc-boot
-   mvn clean install
-   mvn spring-boot:run
-   ```
-
-## Usage
-After installing, you can start using RESTRO-REWARDS to manage your restaurant's loyalty program. Here are some basic commands:
-
-- **Add Customer:**
-  ```bash
-  java -cp target/classes com.yourpackage.Main addCustomer "Customer Name" "Customer Email"
-  ```
-
-- **Log Transaction:**
-  ```bash
-  java -cp target/classes com.yourpackage.Main logTransaction "Customer Email" "Transaction Amount"
-  ```
-
-- **Check Rewards:**
-  ```bash
-  java -cp target/classes com.yourpackage.Main checkRewards "Customer Email"
-  ```
-
-## Application Configuration
-The application runs on the default port specified in the `application.properties` file. You can change the port number by modifying the `application.properties` file if needed.
-
-## Contact
-For any questions or suggestions, feel free to contact:
-
-- Name: Yanendra Jha
-- Email: yanendrajha37@gmail.com
+## Architecture
 
 ```
+┌────────────────────────────────────────────────────┐
+│                  REST Clients                       │
+└──────────────────────┬─────────────────────────────┘
+                       │ HTTP (JSON)
+                       ▼
+┌────────────────────────────────────────────────────┐
+│          Spring MVC + Spring Security              │
+│        Token-based Auth · Role-based ACL           │
+│              (42-security-rest)                     │
+└──────────────────────┬─────────────────────────────┘
+                       │
+                       ▼
+┌────────────────────────────────────────────────────┐
+│            Service Layer + AOP                      │
+│     Transaction Management · Audit Logging         │
+│         (22-aop, 28-transactions)                  │
+└──────────────────────┬─────────────────────────────┘
+                       │
+                       ▼
+┌────────────────────────────────────────────────────┐
+│          Spring Data JPA / JDBC                    │
+│     Normalized Schema (10+ tables)                 │
+│       (26-jdbc, 34-spring-data-jpa)                │
+└──────────────────────┬─────────────────────────────┘
+                       │
+                       ▼
+┌────────────────────────────────────────────────────┐
+│                    HSQLDB                            │
+└────────────────────────────────────────────────────┘
+```
 
-Please replace `"com.yourpackage.Main"` with the actual package and main class name in your project.
+---
+
+## Modules
+
+| Module | Concept |
+|--------|---------|
+| `00-rewards-common` | Domain models and shared interfaces |
+| `01-rewards-db` | Database schema and seed data |
+| `26-jdbc` | Raw JDBC data access |
+| `28-transactions` | Declarative transaction management |
+| `34-spring-data-jpa` | Spring Data JPA repositories |
+| `36-mvc` | Spring MVC web layer |
+| `38-rest-ws` | RESTful API endpoints |
+| `42-security-rest` | Spring Security with token-based auth |
+| `44-actuator` | Production monitoring and health checks |
+
+---
+
+## Features
+
+- 🔐 Authentication and role-based access control (Spring Security)
+- 💳 Transaction processing with reward point calculation
+- 📊 Customer activity reports and reward tracking
+- 🧪 Comprehensive test coverage (JUnit + Spring Boot Test)
+- 📈 Production monitoring via Spring Actuator
+- 🗄️ Normalized MySQL schema with Spring Data JPA
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Java 11+
+- Maven 3.6+
+- MySQL
+
+### Run
+
+```bash
+git clone https://github.com/Yanendrajha/RESTRO-REWARDS.git
+cd RESTRO-REWARDS
+mvn clean install
+cd 38-rest-ws
+mvn spring-boot:run
+```
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/rewards/{id}` | Get customer rewards |
+| POST | `/transactions` | Log a transaction |
+| GET | `/customers` | List all customers |
+| POST | `/customers` | Add new customer |
+
+---
+
+## Tech Stack
+
+- **Language:** Java 11
+- **Framework:** Spring Boot, Spring MVC, Spring Security, Spring Data JPA
+- **Database:** MySQL
+- **Testing:** JUnit, Spring Boot Test
+- **Build:** Maven (multi-module)
